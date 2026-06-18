@@ -23,6 +23,6 @@ sudo docker rm $CONTAINER_NAME || true
                                                                                                                                         
 echo "Starting the new container with a Bind Mount (sync)..."                                                                          
 # The -v flag syncs the EC2 folder to the container's /app folder                                                                      
-sudo docker run -d --name $CONTAINER_NAME -p 8080:80 -v $PROJECT_DIR:/app $IMAGE_NAME:latest                                                                                                               
+sudo docker run -d --name $CONTAINER_NAME -p 80:80 -v $PROJECT_DIR:/app $IMAGE_NAME:latest                                                                                                               
                                                                                                                                         
 echo "Deployment complete!"  

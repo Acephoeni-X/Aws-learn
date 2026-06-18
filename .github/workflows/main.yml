@@ -33,5 +33,5 @@ jobs:
             git pull origin main                                                                                                       
                                                                                                                                         
             # 3. Make the deploy script executable and run it                                                                          
-            chmod +x deploy.sh                                                                                                         
-            ./deploy.sh   
+            chmod +x build.sh                                                                                                         
+            ./build.sh   

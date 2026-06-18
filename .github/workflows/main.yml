@@ -1,0 +1,47 @@
+                                                                                                                                       
+name: Deploy Python API to EC2                                                                                                         
+                                                                                                                                       
+# This tells GitHub to run this workflow every time you push code to the 'main' branch                                                 
+on:                                                                                                                                    
+  push:                                                                                                                                
+    branches:                                                                                                                          
+      - main                                                                                                                           
+                                                                                                                                       
+jobs:                                                                                                                                  
+  deploy:                                                                                                                              
+    name: Build and Deploy to EC2                                                                                                      
+    runs-on: ubuntu-latest                                                                                                             
+                                                                                                                                       
+    steps:                                                                                                                             
+      # Step 1: Check out the code from your repository                                                                                
+      - name: Checkout Code                                                                                                            
+        uses: actions/checkout@v4                                                                                                      
+                                                                                                                                       
+      # Step 2: SSH into the EC2 instance and run deployment commands                                                                  
+      - name: Deploy to EC2 via SSH                                                                                                    
+        uses: appleboy/ssh-action@v1.0.3                                                                                               
+        with:                                                                                                                          
+          host: ${{ secrets.EC2_HOST }}                                                                                                
+          username: ${{ secrets.EC2_USERNAME }}                                                                                        
+          key: ${{ secrets.EC2_SSH_KEY }}                                                                                              
+          # The script block contains the Linux/Docker commands executed on your EC2 instance                                          
+          script: |                                                                                                                    
+            # 1. Navigate to the project directory (or clone it if it doesn't exist)                                                   
+            if [ ! -d "/app/Aws-learn" ]; then                                                          
+              git clone https://github.com/Acephoeni-X/Aws-learn.git /home/${{ secrets.EC2_USERNAME }}/tracker-api       
+            fi                                                                                                                         
+            cd /app/Aws-learn                                                                          
+                                                                                                                                       
+            # 2. Pull the latest code from the main branch                                                                             
+            git pull origin main                                                                                                       
+                                                                                                                                       
+            # 3. Build the new Docker image                                                                                            
+            docker build -t tracker-api-image:latest .                                                                                 
+                                                                                                                                       
+            # 4. Stop and remove the old container if it exists                                                                        
+            docker stop tracker-container || true                                                                                      
+            docker rm tracker-container || true                                                                                        
+                                                                                                                                       
+            # 5. Run the new Docker container on port 80                                                                               
+            # We map port 80 on the EC2 instance to port 80 inside the container                                                       
+            docker run -d --name tracker-container -p 80:80 tracker-api-image:latest                                                   
